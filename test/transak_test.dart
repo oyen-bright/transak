@@ -8,10 +8,8 @@ class MockTransakPlatform
     with MockPlatformInterfaceMixin
     implements TransakPlatform {
   @override
-  Future<String?> getPlatformVersion() => Future.value('42');
-
-  @override
-  Future initiateTransaction({required TransactionParams payload}) {
+  Future<Map<String, String>?> initiateTransaction(
+      {required TransactionParams payload}) {
     // TODO: implement initiateTransaction
     throw UnimplementedError();
   }
@@ -24,11 +22,14 @@ void main() {
     expect(initialPlatform, isInstanceOf<MethodChannelTransak>());
   });
 
-  test('getPlatformVersion', () async {
+  test('initiateTransaction', () async {
     Transak transakPlugin = Transak();
     MockTransakPlatform fakePlatform = MockTransakPlatform();
     TransakPlatform.instance = fakePlatform;
 
-    expect(await transakPlugin.getPlatformVersion(), '42');
+    expect(
+        await transakPlugin.initiateTransaction(
+            payload: TransactionParams.forBuy(walletAddress: "walletAddress")),
+        '42');
   });
 }

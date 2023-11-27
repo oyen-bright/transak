@@ -1,7 +1,7 @@
 name: transak
 description: A new Flutter plugin project.
 version: 0.0.1
-homepage:
+homepage: https://github.com/oyen-bright/transak.git
 
 environment:
   sdk: '>=3.1.2 <4.0.0'

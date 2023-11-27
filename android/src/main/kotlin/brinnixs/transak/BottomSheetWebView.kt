@@ -9,6 +9,8 @@ import android.widget.FrameLayout
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.net.Uri
+import android.os.Handler
+
 
 import android.widget.ProgressBar
 import android.view.KeyEvent
@@ -80,15 +82,17 @@ class BottomSheetWebView(
                 val url = request?.url
                 val components = Uri.parse(url.toString())
 
-                if (components.host == redirectURL) {
+                if (components.host == Uri.parse(redirectURL).host) {
                     components.queryParameterNames.forEach { item ->
                         components.getQueryParameter(item)?.let { value ->
                             parameters[item] = value
                         }
                     }
-                    close()
-                    result.success(parameters)
-                    println("Extracted Parameters: $parameters")
+                    Handler().postDelayed({
+                        close()
+                        result.success(parameters)
+                    }, 4000) 
+
                     return true
                 }
 
