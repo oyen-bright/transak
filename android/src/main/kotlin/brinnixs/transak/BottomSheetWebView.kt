@@ -30,17 +30,15 @@ class BottomSheetWebView(
 
     private val mBottomSheetDialog: BottomSheetDialog = BottomSheetDialog(context)
     private var mCurrentWebViewScrollY = 0
-    private val redirectURL = arguments["redirectURL"]
-    private val transkURL = arguments["url"]
+    private val redirectURL: String = arguments["redirectURL"] as? String ?: ""
+    private val transkURL: String = arguments["url"] as? String ?: ""
     private val parameters = mutableMapOf<String, String>()
 
     init {
         inflateLayout(context)
         setupBottomSheetBehaviour()
         setupWebView()
-
-        result.success(arguments)
-        // showWithUrl(transkURL)
+        showWithUrl(transkURL)
     }
 
     private fun inflateLayout(context: Context) {
@@ -91,7 +89,7 @@ class BottomSheetWebView(
                     Handler().postDelayed({
                         close()
                         result.success(parameters)
-                    }, 4000) 
+                    }, 5000) 
 
                     return true
                 }

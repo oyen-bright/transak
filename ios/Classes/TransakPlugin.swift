@@ -186,7 +186,7 @@ class WebViewController: UIViewController, WKNavigationDelegate, UIGestureRecogn
             }
 
             // Introduce a 4-second delay before dismissing
-            DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
                 self.dismiss(animated: true, completion: {
                     print("Extracted Parameters: \(self.parameters)")
                     self.result(self.parameters)
