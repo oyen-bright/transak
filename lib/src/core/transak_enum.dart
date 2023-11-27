@@ -1,0 +1,1 @@
+enum TransakEnvironment { test, production }

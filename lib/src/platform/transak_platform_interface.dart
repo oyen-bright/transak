@@ -1,4 +1,5 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:transak/src/core/transak_transaction.dart';
 
 import 'transak_method_channel.dart';
 
@@ -23,7 +24,8 @@ abstract class TransakPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<String?> getPlatformVersion() {
+  Future<Map<String, String>?> initiateTransaction(
+      {required TransactionParams payload}) {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 }

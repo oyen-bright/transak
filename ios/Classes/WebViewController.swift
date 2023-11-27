@@ -3,58 +3,6 @@ import UIKit
 import WebKit
 
 
-
-public class TransakPlugin: NSObject, FlutterPlugin {
-
-  public static func register(with registrar: FlutterPluginRegistrar) {
-    let channel = FlutterMethodChannel(name: "brinnixs/transak", binaryMessenger: registrar.messenger())
-    let instance = TransakPlugin()
-    registrar.addMethodCallDelegate(instance, channel: channel)
-  }
-
-  public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-    switch call.method {
-    case "getPlatformVersion":
-        result("iOS " + UIDevice.current.systemVersion)
-    case "initiateTransaction":
-        self.initiateTransaction(arguments: call.arguments as! Dictionary<String, Any?>, result: result)
-    default:
-      result(FlutterMethodNotImplemented)
-    }
-  }
-
-    public func initiateTransaction(arguments: Dictionary<String, Any?>, result: @escaping FlutterResult) {
-          // Extract URL and title from Flutter method call arguments
-          guard let urlString = arguments["url"] as? String, let title = arguments["title"] as? String, let redirectURL = arguments["redirectURL"] as? String else {
-              result(FlutterError(code: "INVALID_ARGUMENTS", message: "Invalid arguments", details: nil))
-              return
-          }
-        //   result(arguments)
-        //   return
-        
-           
-
-          // Create an instance of WebViewController
-          if let url = URL(string: urlString) {
-              let webViewController = WebViewController(url: url, title: title, result: result, redirectURL: redirectURL)
-
-              // Assuming you have a FlutterViewController to present or push from
-              if let flutterViewController = UIApplication.shared.keyWindow?.rootViewController as? FlutterViewController {
-                  // Present or push the WebViewController
-                 let navVC = UINavigationController(rootViewController: webViewController)
-
-                  flutterViewController.present(navVC, animated: true, completion: nil)
-              }
-          } else {
-              result(FlutterError(code: "INVALID_URL", message: "Invalid URL", details: nil))
-          }
-      }
-}
-
-
-
-
-
 class WebViewController: UIViewController, WKNavigationDelegate, UIGestureRecognizerDelegate {
     
     private let webView: WKWebView = {
@@ -175,32 +123,27 @@ class WebViewController: UIViewController, WKNavigationDelegate, UIGestureRecogn
         }
     }
        func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-    if let url = navigationAction.request.url, let components = URLComponents(url: url, resolvingAgainstBaseURL: true) {
-        if components.url?.absoluteURL.host ==  URL(string:self.redirectURL)?.absoluteURL.host {
-            if let queryItems = components.queryItems {
-                for item in queryItems {
-                    if let value = item.value {
-                        parameters[item.name] = value
-                    }
-                }
-            }
-
-            // Introduce a 4-second delay before dismissing
-            DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
-                self.dismiss(animated: true, completion: {
-                    print("Extracted Parameters: \(self.parameters)")
-                    self.result(self.parameters)
-                })
-            }
-
-            decisionHandler(.cancel)
-            return
-            }
-        }
-
-        decisionHandler(.allow)
-    }
-
+           if let url = navigationAction.request.url, let components = URLComponents(url: url, resolvingAgainstBaseURL: true) {
+               if components.host == self.redirectURL {
+                   if let queryItems = components.queryItems {
+                       for item in queryItems {
+                           if let value = item.value {
+                               parameters[item.name] = value
+                           }
+                       }
+                   }
+                   
+                   dismiss(animated: true, completion: {
+                       print("Extracted Parameters: \(self.parameters)")
+                   })
+                   
+                   decisionHandler(.cancel)
+                   return
+               }
+           }
+           
+           decisionHandler(.allow)
+       }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         progressView.isHidden = true

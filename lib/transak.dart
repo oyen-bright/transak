@@ -1,8 +1,3 @@
-
-import 'transak_platform_interface.dart';
-
-class Transak {
-  Future<String?> getPlatformVersion() {
-    return TransakPlatform.instance.getPlatformVersion();
-  }
-}
+export './src/core/transak.dart';
+export './src/core/transak_enum.dart';
+export './src/core/transak_transaction.dart';

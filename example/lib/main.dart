@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
-
-import 'package:flutter/services.dart';
 import 'package:transak/transak.dart';
 
 void main() {
@@ -16,35 +13,16 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
   final _transakPlugin = Transak();
 
   @override
   void initState() {
+    _transakPlugin.config(
+        environment: TransakEnvironment.test,
+        productsAvailed: "BUY",
+        apiKey: "44c8b47e-613e-47dc-899f-419c567c4438",
+        redirectURL: "https://ecomoto.io/");
     super.initState();
-    initPlatformState();
-  }
-
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
-    try {
-      platformVersion =
-          await _transakPlugin.getPlatformVersion() ?? 'Unknown platform version';
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
   }
 
   @override
@@ -55,7 +33,25 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+          child: TextButton(
+              onPressed: () async {
+                try {
+                  final response = await _transakPlugin.initiateTransaction(
+                      payload: TransactionParams.forBuy(
+                          fiatAmount: 31.50,
+                          email: "oyenbrihight@gmail.com",
+                          walletAddress:
+                              "0x9ABbDFE98A3f89c493831E1c8f3146378CF49f7E",
+                          fiatCurrency: "USD",
+                          cryptoCurrencyCode: "ETH"));
+                  print("HERE IS THE RESPONSE AND PARAMETERS");
+                  print(response);
+                  print("HERE IS THE RESPONSE AND PARAMETERS");
+                } catch (e) {
+                  print(e.toString());
+                }
+              },
+              child: const Text("test transact")),
         ),
       ),
     );
