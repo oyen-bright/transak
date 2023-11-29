@@ -3,56 +3,85 @@ import UIKit
 import WebKit
 
 
+import Flutter
+import UIKit
+import WebKit
 
 public class TransakPlugin: NSObject, FlutterPlugin {
+    private static var eventChannel: FlutterEventChannel?
+     static let eventStreamHandler = EventStreamHandler()
 
-  public static func register(with registrar: FlutterPluginRegistrar) {
-    let channel = FlutterMethodChannel(name: "brinnixs/transak", binaryMessenger: registrar.messenger())
-    let instance = TransakPlugin()
-    registrar.addMethodCallDelegate(instance, channel: channel)
-  }
+   
+    public static func register(with registrar: FlutterPluginRegistrar) {
+        let channel = FlutterMethodChannel(name: "brinnixs/transak", binaryMessenger: registrar.messenger())
+        eventChannel = FlutterEventChannel(name: "brinnixs/transak/events", binaryMessenger: registrar.messenger())
 
-  public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-    switch call.method {
-    case "getPlatformVersion":
-        result("iOS " + UIDevice.current.systemVersion)
-    case "initiateTransaction":
-        self.initiateTransaction(arguments: call.arguments as! Dictionary<String, Any?>, result: result)
-    default:
-      result(FlutterMethodNotImplemented)
+        let instance = TransakPlugin()
+        registrar.addMethodCallDelegate(instance, channel: channel)
+        eventChannel?.setStreamHandler(eventStreamHandler)
     }
-  }
 
-    public func initiateTransaction(arguments: Dictionary<String, Any?>, result: @escaping FlutterResult) {
-          // Extract URL and title from Flutter method call arguments
-          guard let urlString = arguments["url"] as? String, let title = arguments["title"] as? String, let redirectURL = arguments["redirectURL"] as? String else {
-              result(FlutterError(code: "INVALID_ARGUMENTS", message: "Invalid arguments", details: nil))
-              return
-          }
-        //   result(arguments)
-        //   return
-        
-           
+    public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        if call.method == "initiateTransaction" || call.method == "initiateTransactionStream" {
+            if let args = call.arguments as? Dictionary<String, Any?> {
+                self.initiateTransaction(arguments: args, result: result)
+            } else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "Arguments for initiating transaction are invalid or missing.", details: nil))
+            }
+        } else {
+            result(FlutterMethodNotImplemented)
+        }
+    }
 
-          // Create an instance of WebViewController
-          if let url = URL(string: urlString) {
-              let webViewController = WebViewController(url: url, title: title, result: result, redirectURL: redirectURL)
+    private func initiateTransaction(arguments: Dictionary<String, Any?>, result: @escaping FlutterResult) {
+        guard let urlString = arguments["url"] as? String,
+              let title = arguments["title"] as? String,
+              let redirectURL = arguments["redirectURL"] as? String,
+              let url = URL(string: urlString) else {
+            result(FlutterError(code: "INVALID_ARGUMENTS", message: "Invalid arguments", details: nil))
+            return
+        }
 
-              // Assuming you have a FlutterViewController to present or push from
-              if let flutterViewController = UIApplication.shared.keyWindow?.rootViewController as? FlutterViewController {
-                  // Present or push the WebViewController
-                 let navVC = UINavigationController(rootViewController: webViewController)
+        let webViewController = WebViewController(url: url, title: title, result: result, redirectURL: redirectURL)
 
-                  flutterViewController.present(navVC, animated: true, completion: nil)
-              }
-          } else {
-              result(FlutterError(code: "INVALID_URL", message: "Invalid URL", details: nil))
-          }
-      }
+        if let flutterViewController = UIApplication.shared.keyWindow?.rootViewController as? FlutterViewController {
+            let navVC = UINavigationController(rootViewController: webViewController)
+            flutterViewController.present(navVC, animated: true, completion: nil)
+        } else {
+            result(FlutterError(code: "UNABLE_TO_GET_ROOT_VIEW_CONTROLLER", message: "Unable to get root view controller", details: nil))
+        }
+    }
 }
 
+class EventStreamHandler: NSObject, FlutterStreamHandler {
+    private var eventSink: FlutterEventSink?
 
+    func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+        self.eventSink = events
+        return nil
+    }
 
+    func onCancel(withArguments arguments: Any?) -> FlutterError? {
+        eventSink = nil
+        return nil
+    }
+
+    func sendEvent(_ event: Any) {
+        DispatchQueue.main.async {
+            if let sink = self.eventSink {
+                sink(event)
+            } else {
+                print("Error: EventSink is nil")
+            }
+        }
+    }
+
+    static var shared: EventStreamHandler {
+        return TransakPlugin.eventStreamHandler
+    }
+}
+
+// WebViewController implementation continues...
 
 
 class WebViewController: UIViewController, WKNavigationDelegate, UIGestureRecognizerDelegate {
@@ -92,6 +121,7 @@ class WebViewController: UIViewController, WKNavigationDelegate, UIGestureRecogn
         self.redirectURL = redirectURL
         super.init(nibName: nil, bundle: nil)
         self.title = title
+
  
     }
 
@@ -105,6 +135,8 @@ class WebViewController: UIViewController, WKNavigationDelegate, UIGestureRecogn
         view.addSubview(progressView)
         webView.navigationDelegate = self
         webView.load(URLRequest(url: url))
+        EventStreamHandler.shared.sendEvent("sending events")
+
         configureButtons()
         setupProgressView()
         navigationController?.interactivePopGestureRecognizer?.delegate = self
@@ -113,11 +145,9 @@ class WebViewController: UIViewController, WKNavigationDelegate, UIGestureRecogn
 
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
           if gestureRecognizer == navigationController?.interactivePopGestureRecognizer {
-              // Check if the web view can go back
               if webView.canGoBack {
-                  // If yes, go back in the web view
                   webView.goBack()
-                  return false // Prevent default swipe-back behavior
+                  return false 
               }
           }
           return true
@@ -132,6 +162,9 @@ class WebViewController: UIViewController, WKNavigationDelegate, UIGestureRecogn
     
     private func configureButtons() {
         navigationItem.leftBarButtonItems = [UIBarButtonItem(title: "Done", style: .done, target: self, action: #selector(didTapDone))]
+          navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .refresh, target: self, action: #selector(didTapReload)
+        )
     }
     
     private func setupProgressView() {
@@ -150,12 +183,17 @@ class WebViewController: UIViewController, WKNavigationDelegate, UIGestureRecogn
         progressView.frame = CGRect(x: 0, y: view.safeAreaInsets.top, width: view.bounds.width, height: 2.0)
     }
     
+    
     @objc private func didTapDone() {
-        dismiss(animated: true){
-          self.result(FlutterError(code: "TRANSACTION_CANCELLED", message: "Transaction cancelled", details: nil))
-
+        guard isBeingPresented || presentingViewController != nil else { return }
+        dismiss(animated: true) {
+            self.result(FlutterError(code: "TRANSACTION_CANCELLED", message: "Transaction cancelled by user.", details: nil))
         }
     }
+      @objc private func didTapReload() {
+        webView.reload()
+    }
+    
     
     
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
@@ -185,12 +223,14 @@ class WebViewController: UIViewController, WKNavigationDelegate, UIGestureRecogn
                 }
             }
 
-            // Introduce a 4-second delay before dismissing
-            DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
-                self.dismiss(animated: true, completion: {
-                    print("Extracted Parameters: \(self.parameters)")
-                    self.result(self.parameters)
-                })
+        EventStreamHandler.shared.sendEvent(self.parameters)
+
+             DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                if self.isBeingPresented || self.presentingViewController != nil {
+                    self.dismiss(animated: true, completion: {
+                        self.result(self.parameters)
+                    })
+                } 
             }
 
             decisionHandler(.cancel)

@@ -11,6 +11,10 @@ dependencies:
   flutter:
     sdk: flutter
   plugin_platform_interface: ^2.0.2
+  web_socket_channel: ^2.4.0
+  pusher_channels_flutter: ^2.2.0
+
+
 
 dev_dependencies:
   flutter_test:

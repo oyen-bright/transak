@@ -33,12 +33,17 @@ class BottomSheetWebView(
     private val redirectURL: String = arguments["redirectURL"] as? String ?: ""
     private val transkURL: String = arguments["url"] as? String ?: ""
     private val parameters = mutableMapOf<String, String>()
+    private val handler = Handler()
+    private var isResultSent = false 
+
+
 
     init {
         inflateLayout(context)
         setupBottomSheetBehaviour()
         setupWebView()
         showWithUrl(transkURL)
+        
     }
 
     private fun inflateLayout(context: Context) {
@@ -55,7 +60,7 @@ class BottomSheetWebView(
                     BottomSheetBehavior.BottomSheetCallback() {
                     override fun onSlide(bottomSheet: View, slideOffset: Float) {
             //              if (webView.canGoBack()) {
-            //     webView.goBack()
+            //                    webView.goBack()
             // }
                     }
 
@@ -73,27 +78,27 @@ class BottomSheetWebView(
 
     private fun setupWebView() {
         val progressBar: ProgressBar = findViewById(R.id.progressBar)
-
         webView.settings.javaScriptEnabled = true
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 val url = request?.url
                 val components = Uri.parse(url.toString())
 
-                if (components.host == Uri.parse(redirectURL).host) {
+                if (!isResultSent && components.host == Uri.parse(redirectURL).host) {
+                    isResultSent = true
                     components.queryParameterNames.forEach { item ->
                         components.getQueryParameter(item)?.let { value ->
                             parameters[item] = value
                         }
                     }
-                    Handler().postDelayed({
+                    TransakPlugin.sendEvent(parameters)
+                    handler.postDelayed({
                         close()
                         result.success(parameters)
-                    }, 5000) 
+                    }, 5000)
 
                     return true
                 }
-
                 return false
             }
 
@@ -133,11 +138,27 @@ class BottomSheetWebView(
     }
 
     private fun close() {
+        handler.removeCallbacksAndMessages(null)
         mBottomSheetDialog.dismiss()
+        disposeWebView()
     }
 
-    private fun handleTransactionCancelled() {
-        result.error("TRANSACTION_CANCELLED", "Transaction cancelled", null)
+     private fun handleTransactionCancelled() {
+        if (!isResultSent) {
+            isResultSent = true
+            result.error("TRANSACTION_CANCELLED", "Transaction cancelled", null)
+        }
         close()
     }
+
+    private fun disposeWebView() {
+        //TODO:dispose webview
+        webView?.let {
+        it.loadUrl("about:blank")
+        it.onPause()
+        it.removeAllViews()
+        it.destroyDrawingCache()
+        it.destroy()
+    }
+}
 }

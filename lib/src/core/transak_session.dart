@@ -35,7 +35,4 @@ class SessionConfig {
       throw TransakException("Transak configuration already set");
     }
   }
-
-  // static ({String url, String redirectURL}) buildURL(
-  //     TransactionParams params) {}
 }

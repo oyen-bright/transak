@@ -35,16 +35,37 @@ import 'dart:convert';
 ///
 /// For more information, refer to the [Transak Documentation](https://docs.transak.com/docs/query-parameters).
 class TransactionParams {
+  /// The amount in fiat currency for the transaction.
   final double? fiatAmount;
+
+  /// The code of the fiat currency for the transaction.
   final String? fiatCurrency;
+
+  /// The email address of the user, used for identification and order tracking.
   final String? email;
+
+  /// Additional user data in a key-value pair format.
   final Map<String, dynamic>? userData;
+
+  /// The blockchain address where the cryptocurrency will be sent.
   final String? walletAddress;
+
+  /// Multiple wallet addresses for different cryptocurrencies and networks in JSON object format.
   final Map<String, dynamic>? walletAddressesData;
+
+  /// The default amount of cryptocurrency for the transaction.
   final double? defaultCryptoAmount;
+
+  /// The fixed amount of cryptocurrency for selling transactions.
   final double? cryptoAmount;
+
+  /// A unique identifier for the order, used for tracking.
   final String? partnerOrderId;
+
+  /// A unique identifier for the customer, used in transaction callbacks.
   final String? partnerCustomerId;
+
+  /// The code of the cryptocurrency for the transaction.
   final String? cryptoCurrencyCode;
 
   // Private constructor for buying

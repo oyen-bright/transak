@@ -24,8 +24,19 @@ abstract class TransakPlatform extends PlatformInterface {
     _instance = instance;
   }
 
+  /// A broadcast stream from the native platform
+  Stream<dynamic> get onEvent {
+    throw UnimplementedError('onEvent has not been implemented.');
+  }
+
   Future<Map<String, String>?> initiateTransaction(
       {required TransactionParams payload}) {
-    throw UnimplementedError('platformVersion() has not been implemented.');
+    throw UnimplementedError('initiateTransaction has not been implemented.');
+  }
+
+  Future<Map<String, String>?> initiateTransactionStream(
+      {required TransactionParams payload}) {
+    throw UnimplementedError(
+        'initiateTransactionStream has not been implemented.');
   }
 }

@@ -13,6 +13,17 @@ class MockTransakPlatform
     // TODO: implement initiateTransaction
     throw UnimplementedError();
   }
+
+  @override
+  // TODO: implement onEvent
+  Stream get onEvent => throw UnimplementedError();
+
+  @override
+  Future<Map<String, String>?> initiateTransactionStream(
+      {required TransactionParams payload}) {
+    // TODO: implement initiateTransactionStream
+    throw UnimplementedError();
+  }
 }
 
 void main() {
