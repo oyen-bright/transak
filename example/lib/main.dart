@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:transak/transak.dart';
 
@@ -18,11 +21,19 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     _transakPlugin.config(
+        iosModalTitle: "",
         environment: TransakEnvironment.test,
         productsAvailed: "BUY",
         apiKey: "44c8b47e-613e-47dc-899f-419c567c4438",
         redirectURL: "https://ecomoto.io/");
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    print("disposed");
+    _transakPlugin.dispose();
+    super.dispose();
   }
 
   @override
@@ -36,17 +47,26 @@ class _MyAppState extends State<MyApp> {
           child: TextButton(
               onPressed: () async {
                 try {
-                  final response = await _transakPlugin.initiateTransaction(
-                      payload: TransactionParams.forBuy(
-                          fiatAmount: 31.50,
+                  // _transakPlugin.transactionEvents.listen((event) {
+                  //   log(event["eventName"], name: "pusherEvents");
+                  // });
+                  final StreamController<TransakEvent> transaction =
+                      StreamController();
+                  await _transakPlugin.initiateTransactionWithStream(
+                      TransactionParams.forBuy(
+                          fiatAmount: 32.50,
                           email: "oyenbrihight@gmail.com",
                           walletAddress:
                               "0x9ABbDFE98A3f89c493831E1c8f3146378CF49f7E",
                           fiatCurrency: "USD",
-                          cryptoCurrencyCode: "ETH"));
-                  print("HERE IS THE RESPONSE AND PARAMETERS");
-                  print(response);
-                  print("HERE IS THE RESPONSE AND PARAMETERS");
+                          cryptoCurrencyCode: "ETH"),
+                      streamController: transaction);
+
+                  transaction.stream.listen((event) {
+                    log(event.eventName, name: "initiateTransactionWithEvent");
+                  });
+                } on TransakException catch (e) {
+                  print(e.errorMessage);
                 } catch (e) {
                   print(e.toString());
                 }
