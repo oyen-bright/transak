@@ -68,9 +68,9 @@ class Transak {
         TransakConfigParams(
           apiKey: apiKey,
           exchangeScreenTitle: exchangeScreenTitle,
-          productsAvailed: productsAvailed,
           defaultFiatCurrency: defaultFiatCurrency,
           countryCode: countryCode,
+          networks: networks,
           excludeFiatCurrencies: excludeFiatCurrencies,
           defaultNetwork: defaultNetwork,
           defaultPaymentMethod: defaultPaymentMethod,
@@ -86,7 +86,6 @@ class Transak {
           hideMenu: hideMenu,
           redirectURL: redirectURL,
           walletRedirection: walletRedirection,
-          networks: networks,
           defaultFiatAmount: defaultFiatAmount,
         ),
         modalTitle: iosModalTitle,

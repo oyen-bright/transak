@@ -54,7 +54,7 @@ class TransakConfigParams {
   /// Only if BUY,SELL is passed, the users will see both the widgets.
   /// If BUY,SELL is passed then users will see BUY widget first.
   /// Conversely, if SELL,BUY is passed, then users will see the SELL widget first.
-  final String productsAvailed;
+  // final String productsAvailed;
 
   /// The three-letter code of the fiat currency you want the customer to buy/sell cryptocurrency.
   /// If the fiat currency is not supported by a specific product type (BUY/SELL) then the default widget will load with all the supported fiat currencies for that product type.
@@ -137,7 +137,6 @@ class TransakConfigParams {
   TransakConfigParams({
     required this.apiKey,
     required this.exchangeScreenTitle,
-    required this.productsAvailed,
     required this.defaultFiatCurrency,
     required this.countryCode,
     required this.excludeFiatCurrencies,
@@ -164,7 +163,6 @@ class TransakConfigParams {
     return <String, dynamic>{
       'apiKey': apiKey,
       'exchangeScreenTitle': exchangeScreenTitle,
-      'productsAvailed': productsAvailed,
       'defaultFiatCurrency': defaultFiatCurrency,
       'countryCode': countryCode,
       'excludeFiatCurrencies': excludeFiatCurrencies,
@@ -192,7 +190,6 @@ class TransakConfigParams {
     return TransakConfigParams(
       apiKey: map['apiKey'] as String,
       exchangeScreenTitle: map['exchangeScreenTitle'] as String,
-      productsAvailed: map['productsAvailed'] as String,
       defaultFiatCurrency: map['defaultFiatCurrency'] as String,
       countryCode: map['countryCode'] as String,
       excludeFiatCurrencies: map['excludeFiatCurrencies'] as String,

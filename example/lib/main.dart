@@ -23,7 +23,6 @@ class _MyAppState extends State<MyApp> {
     _transakPlugin.config(
         iosModalTitle: "",
         environment: TransakEnvironment.test,
-        productsAvailed: "BUY",
         apiKey: "44c8b47e-613e-47dc-899f-419c567c4438",
         redirectURL: "https://ecomoto.io/");
     super.initState();

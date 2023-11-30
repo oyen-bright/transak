@@ -68,11 +68,16 @@ class TransactionParams {
   /// The code of the cryptocurrency for the transaction.
   final String? cryptoCurrencyCode;
 
+  final String? network;
+
+  final String productsAvailed;
+
   // Private constructor for buying
   TransactionParams._forBuy({
     required double? fiatAmount,
     required String? fiatCurrency,
     required String? email,
+    required String? productsAvailed,
     required Map<String, dynamic>? userData,
     required String? walletAddress,
     required Map<String, dynamic>? walletAddressesData,
@@ -86,6 +91,7 @@ class TransactionParams {
           fiatCurrency: fiatCurrency,
           email: email,
           userData: userData,
+          productsAvailed: productsAvailed ?? "BUY",
           walletAddress: walletAddress,
           walletAddressesData: walletAddressesData,
           defaultCryptoAmount: defaultCryptoAmount,
@@ -96,25 +102,30 @@ class TransactionParams {
         );
 
   // Private constructor for selling
-  TransactionParams._forSell({
-    required double fiatAmount,
-    required String fiatCurrency,
-    String? email,
-    Map<String, dynamic>? userData,
-    required String walletAddress,
-    Map<String, dynamic>? walletAddressesData,
-    required double cryptoAmount,
-    required String partnerOrderId,
-    required String partnerCustomerId,
-    required String cryptoCurrencyCode,
-  }) : this(
+  TransactionParams._forSell(
+      {required double? fiatAmount,
+      required String fiatCurrency,
+      required String? email,
+      required Map<String, dynamic>? userData,
+      required String? walletAddress,
+      required String? productsAvailed,
+      required Map<String, dynamic>? walletAddressesData,
+      required double? cryptoAmount,
+      required String? partnerOrderId,
+      required String? network,
+      required String? partnerCustomerId,
+      required String cryptoCurrencyCode,
+      required double? defaultCryptoAmount})
+      : this(
           fiatAmount: fiatAmount,
           fiatCurrency: fiatCurrency,
           email: email,
+          network: network,
           userData: userData,
+          productsAvailed: productsAvailed ?? "SELL",
           walletAddress: walletAddress,
           walletAddressesData: walletAddressesData,
-          defaultCryptoAmount: 0,
+          defaultCryptoAmount: defaultCryptoAmount,
           cryptoAmount: cryptoAmount,
           partnerOrderId: partnerOrderId,
           partnerCustomerId: partnerCustomerId,
@@ -126,12 +137,14 @@ class TransactionParams {
     required this.fiatCurrency,
     this.email,
     this.userData,
+    this.productsAvailed = "BUY,SELL",
     required this.walletAddress,
     this.walletAddressesData,
     this.defaultCryptoAmount,
     required this.cryptoAmount,
     this.partnerOrderId,
     this.partnerCustomerId,
+    this.network,
     required this.cryptoCurrencyCode,
   });
 
@@ -144,6 +157,7 @@ class TransactionParams {
     required String? walletAddress,
     Map<String, dynamic>? walletAddressesData,
     double? defaultCryptoAmount,
+    String? productsAvailed,
     double? cryptoAmount,
     String? partnerOrderId,
     String? partnerCustomerId,
@@ -154,6 +168,7 @@ class TransactionParams {
         fiatAmount: fiatAmount,
         fiatCurrency: fiatCurrency,
         email: email,
+        productsAvailed: productsAvailed,
         userData: userData,
         walletAddress: walletAddress,
         walletAddressesData: walletAddressesData,
@@ -164,22 +179,28 @@ class TransactionParams {
       );
 
   factory TransactionParams.forSell({
-    required double fiatAmount,
+    double? fiatAmount,
     required String fiatCurrency,
     String? email,
+    String? productsAvailed,
     Map<String, dynamic>? userData,
-    required String walletAddress,
+    String? walletAddress,
     Map<String, dynamic>? walletAddressesData,
     required double cryptoAmount,
-    required String partnerOrderId,
-    required String partnerCustomerId,
+    String? partnerOrderId,
+    String? partnerCustomerId,
+    required String? network,
+    double? defaultCryptoAmount,
     required String cryptoCurrencyCode,
   }) =>
       TransactionParams._forSell(
         fiatAmount: fiatAmount,
+        productsAvailed: productsAvailed,
         fiatCurrency: fiatCurrency,
         email: email,
+        network: network,
         userData: userData,
+        defaultCryptoAmount: defaultCryptoAmount,
         walletAddress: walletAddress,
         walletAddressesData: walletAddressesData,
         cryptoAmount: cryptoAmount,
@@ -193,6 +214,7 @@ class TransactionParams {
       'fiatAmount': fiatAmount,
       'fiatCurrency': fiatCurrency,
       'email': email,
+      'productsAvailed': productsAvailed,
       'userData': userData,
       'walletAddress': walletAddress,
       'walletAddressesData': walletAddressesData,
@@ -201,6 +223,7 @@ class TransactionParams {
       'partnerOrderId': partnerOrderId,
       'partnerCustomerId': partnerCustomerId,
       'cryptoCurrencyCode': cryptoCurrencyCode,
+      'network': network
     };
   }
 
@@ -209,11 +232,13 @@ class TransactionParams {
       fiatAmount: map['fiatAmount'] as double,
       fiatCurrency: map['fiatCurrency'] as String,
       email: map['email'] as String?,
+      network: map['network'] as String?,
       userData: map['userData'] as Map<String, dynamic>?,
       walletAddress: map['walletAddress'] as String,
       walletAddressesData: map['walletAddressesData'] as Map<String, dynamic>?,
       defaultCryptoAmount: map['defaultCryptoAmount'] as double?,
       cryptoAmount: map['cryptoAmount'] as double,
+      productsAvailed: map['productsAvailed'] as String,
       partnerOrderId: map['partnerOrderId'] as String?,
       partnerCustomerId: map['partnerCustomerId'] as String?,
       cryptoCurrencyCode: map['cryptoCurrencyCode'] as String,
