@@ -135,7 +135,6 @@ class WebViewController: UIViewController, WKNavigationDelegate, UIGestureRecogn
         view.addSubview(progressView)
         webView.navigationDelegate = self
         webView.load(URLRequest(url: url))
-        EventStreamHandler.shared.sendEvent("sending events")
 
         configureButtons()
         setupProgressView()

@@ -156,7 +156,6 @@ class BottomSheetWebView(
         webView?.let {
         it.loadUrl("about:blank")
         it.onPause()
-        it.removeAllViews()
         it.destroyDrawingCache()
         it.destroy()
     }

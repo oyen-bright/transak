@@ -97,7 +97,10 @@ class Transak {
   }
 
   void _setUpPusher() async {
+    log("pusher seetup");
     _pusher ??= PusherChannelsFlutter.getInstance();
+
+    log(_pusher!.channels.toString());
     try {
       await _pusher?.init(
         apiKey: "1d9ffac87de599c61283",
@@ -195,13 +198,12 @@ class Transak {
     String? transactionId,
     StreamController<TransakEvent>? streamController,
     TransactionEventName? filterEvent,
-  ) {
+  ) async {
     if (transactionId != null) {
-      _pusher?.subscribe(
+      _channelName = (await _pusher?.subscribe(
         channelName: transactionId,
         onEvent: (dynamic event) {
           if (event == null) return;
-
           final transakEvent = TransakEvent.fromPusherEvent(event);
           if (transakEvent.transactionEventName != null &&
               (filterEvent == null ||
@@ -209,7 +211,8 @@ class Transak {
             streamController?.add(transakEvent);
           }
         },
-      );
+      ))
+          ?.channelName;
     }
   }
 
@@ -259,6 +262,7 @@ class Transak {
   // }
 
   void dispose() {
+    log("pusher disclosed");
     _pluginEventSubscription?.cancel();
     pusherEvents.close();
     _pusher?.disconnect();

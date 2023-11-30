@@ -47,9 +47,9 @@ class _MyAppState extends State<MyApp> {
           child: TextButton(
               onPressed: () async {
                 try {
-                  // _transakPlugin.transactionEvents.listen((event) {
-                  //   log(event["eventName"], name: "pusherEvents");
-                  // });
+                  _transakPlugin.transactionEvents.listen((event) {
+                    log(event["eventName"], name: "pusherEvents");
+                  });
                   final StreamController<TransakEvent> transaction =
                       StreamController();
                   await _transakPlugin.initiateTransactionWithStream(
@@ -63,7 +63,7 @@ class _MyAppState extends State<MyApp> {
                       streamController: transaction);
 
                   transaction.stream.listen((event) {
-                    log(event.eventName, name: "initiateTransactionWithEvent");
+                    log(event.eventName, name: "transactionEventStream");
                   });
                 } on TransakException catch (e) {
                   print(e.errorMessage);
