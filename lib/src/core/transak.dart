@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:flutter/services.dart';
 import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
@@ -97,10 +96,8 @@ class Transak {
   }
 
   void _setUpPusher() async {
-    log("pusher seetup");
     _pusher ??= PusherChannelsFlutter.getInstance();
 
-    log(_pusher!.channels.toString());
     try {
       await _pusher?.init(
         apiKey: "1d9ffac87de599c61283",
@@ -109,7 +106,10 @@ class Transak {
         onEvent: _onEvent,
       );
     } catch (e) {
-      log("ERROR in Pusher setup: $e", name: "Pusher Error");
+      pusherEvents.add({
+        "eventName": "TRANSAK_PUSHER_ERROR",
+        "data": e.toString(),
+      });
     }
   }
 
@@ -184,7 +184,6 @@ class Transak {
       _subscribeToPusher(transactionId, streamController, filterEvent);
       _connectToPusher();
     }
-    log("Event coming $event", name: "from plugin");
   }
 
   void _unsubscribeFromPusher() {
@@ -220,49 +219,7 @@ class Transak {
     _pusher?.connect();
   }
 
-  // void _eventListener(
-  //     {StreamController<TransakEvent>? streamController,
-  //     TransactionEventName? filterEvent}) {
-  //   _pluginEventSubscription?.cancel();
-  //   _pluginEventSubscription =
-  //       TransakPlatform.instance.onEvent.listen((event) async {
-  //     if (streamController != null) {
-  //       if (event is Map) {
-  //         final transactionId = Map.from(event)['orderId'];
-  //         channelName != null
-  //             ? await _pusher!.unsubscribe(channelName: channelName!)
-  //             : null;
-  //         channelName = (await _pusher?.subscribe(
-  //                 channelName: transactionId,
-  //                 onEvent: (dynamic event) {
-  //                   if (event != null) {
-  //                     final transakEvent = TransakEvent.fromPusherEvent(event);
-  //                     if (transakEvent.transactionEventName != null) {
-  //                       if (filterEvent != null) {
-  //                         transakEvent.transactionEventName == filterEvent
-  //                             ? streamController.add(transakEvent)
-  //                             : null;
-  //                       } else {
-  //                         streamController.add(transakEvent);
-  //                       }
-  //                     }
-  //                   }
-  //                 }))
-  //             ?.channelName;
-  //         await _pusher?.connect();
-  //       }
-  //       log("Event coming $event", name: "from plugin");
-  //     }
-  //   }, onError: (error) {
-  //     pusherEvents.add({
-  //       "eventName": "TRANSAK_ERROR",
-  //       "data": error.toString(),
-  //     });
-  //   });
-  // }
-
   void dispose() {
-    log("pusher disclosed");
     _pluginEventSubscription?.cancel();
     pusherEvents.close();
     _pusher?.disconnect();
