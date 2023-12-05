@@ -71,7 +71,7 @@ class EventStreamHandler: NSObject, FlutterStreamHandler {
             if let sink = self.eventSink {
                 sink(event)
             } else {
-                print("Error: EventSink is nil")
+                // print("Error: EventSink is nil")
             }
         }
     }
