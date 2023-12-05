@@ -48,8 +48,14 @@ class MethodChannelTransak extends TransakPlatform {
     }
     final ({String redirectURL, String url}) urls =
         urlBuilder(sessionConfig.url!, payload, sessionConfig.params!);
+
+    print(urls.url);
+
+    const testURL =
+        "https://global.transak.com/?apiKey=44c8b47e-613e-47dc-899f-419c567c4438&cryptoCurrencyCode=USDC&network=polygon&defaultCryptoAmount=1000&fiatCurrency=USD&productsAvailed=SELL";
     final dynamic response = await methodChannel.invokeMethod<dynamic>(method, {
-      'url': urls.url,
+      'url': testURL,
+      // 'url': urls.url,
       'redirectURL': urls.redirectURL,
       'title': sessionConfig.modalTitle,
     });

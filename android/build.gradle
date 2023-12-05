@@ -24,7 +24,6 @@ allprojects {
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 
 
 android {
@@ -32,6 +31,9 @@ android {
         namespace 'brinnixs.transak'
     }
 
+    viewBinding {
+        enabled = true
+    }
     compileSdkVersion 33
 
     compileOptions {

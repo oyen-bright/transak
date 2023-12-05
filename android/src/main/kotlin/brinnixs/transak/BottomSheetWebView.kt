@@ -10,6 +10,8 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.net.Uri
 import android.os.Handler
+import android.view.ViewGroup
+import android.view.LayoutInflater
 
 
 import android.widget.ProgressBar
@@ -17,7 +19,9 @@ import android.view.KeyEvent
 import android.webkit.WebViewClient
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import kotlinx.android.synthetic.main.bottom_sheet_webview.view.*
+// import kotlinx.android.synthetic.main.bottom_sheet_webview.view.*
+import brinnixs.transak.databinding.BottomSheetWebviewBinding
+
 
 import io.flutter.plugin.common.MethodChannel.Result
 
@@ -29,6 +33,7 @@ class BottomSheetWebView(
 ) : FrameLayout(context) {
 
     private val mBottomSheetDialog: BottomSheetDialog = BottomSheetDialog(context)
+    private val binding: BottomSheetWebviewBinding = BottomSheetWebviewBinding.inflate(LayoutInflater.from(context), this, true)
     private var mCurrentWebViewScrollY = 0
     private val redirectURL: String = arguments["redirectURL"] as? String ?: ""
     private val transkURL: String = arguments["url"] as? String ?: ""
@@ -38,20 +43,15 @@ class BottomSheetWebView(
 
 
 
-    init {
-        inflateLayout(context)
-        setupBottomSheetBehaviour()
-        setupWebView()
-        showWithUrl(transkURL)
-        
+  init {
+    if (binding.root.parent != null) {
+        (binding.root.parent as ViewGroup).removeView(binding.root) // Remove from the current parent if exists
     }
-
-    private fun inflateLayout(context: Context) {
-        inflate(context, R.layout.bottom_sheet_webview, this)
-        mBottomSheetDialog.setContentView(this)
-        mBottomSheetDialog.window?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
-            ?.setBackgroundResource(android.R.color.transparent)
-    }
+    mBottomSheetDialog.setContentView(binding.root)
+    setupBottomSheetBehaviour()
+    setupWebView()
+    showWithUrl(transkURL)
+}
 
     private fun setupBottomSheetBehaviour() {
         (parent as? View)?.let { view ->
@@ -59,8 +59,8 @@ class BottomSheetWebView(
                 behaviour.addBottomSheetCallback(object :
                     BottomSheetBehavior.BottomSheetCallback() {
                     override fun onSlide(bottomSheet: View, slideOffset: Float) {
-            //              if (webView.canGoBack()) {
-            //                    webView.goBack()
+            //              if ( binding.webView.canGoBack()) {
+            //                     binding.webView.goBack()
             // }
                     }
 
@@ -77,9 +77,10 @@ class BottomSheetWebView(
     }
 
     private fun setupWebView() {
-        val progressBar: ProgressBar = findViewById(R.id.progressBar)
-        webView.settings.javaScriptEnabled = true
-        webView.webViewClient = object : WebViewClient() {
+         val progressBar: ProgressBar = binding.progressBar
+
+         binding.webView.settings.javaScriptEnabled = true
+         binding.webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 val url = request?.url
                 val components = Uri.parse(url.toString())
@@ -113,15 +114,15 @@ class BottomSheetWebView(
             }
         }
 
-        webView.onScrollChangedCallback = object : ObservableWebView.OnScrollChangeListener {
+         binding.webView.onScrollChangedCallback = object : ObservableWebView.OnScrollChangeListener {
             override fun onScrollChanged(l: Int, t: Int, oldl: Int, oldt: Int) {
                 mCurrentWebViewScrollY = t
             }
         }
 
-         webView.setOnKeyListener { _, keyCode, event ->
-            if (keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_UP && webView.canGoBack()) {
-                webView.goBack()
+          binding.webView.setOnKeyListener { _, keyCode, event ->
+            if (keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_UP &&  binding.webView.canGoBack()) {
+                 binding.webView.goBack()
                 true
             } else {
                 false
@@ -132,9 +133,9 @@ class BottomSheetWebView(
     }
 
     private fun showWithUrl(url: String) {
-        webView.settings.javaScriptEnabled = true
-        webView.loadUrl(url)
-        mBottomSheetDialog.show()
+         binding.webView.settings.javaScriptEnabled = true
+         binding.webView.loadUrl(url)
+         mBottomSheetDialog.show()
     }
 
     private fun close() {
@@ -153,7 +154,7 @@ class BottomSheetWebView(
 
     private fun disposeWebView() {
         //TODO:dispose webview
-        webView?.let {
+        binding.webView?.let {
         it.loadUrl("about:blank")
         it.onPause()
         it.destroyDrawingCache()
